@@ -2,6 +2,7 @@ from Config import Config
 from MSSQLHandler import *
 from ParameterReader import *
 import sys
+from Getch import getChar
 
 class SQuickLHandler:
     _configPath = "config.json"
@@ -42,7 +43,11 @@ class SQuickLHandler:
     def requestAction(self, sqlHandler):
         print(chr(27) + "[2J")
         print(F"SQuickL [{sqlHandler.credentialInfo}@{sqlHandler.serverName}]")
-        input()
+        
+        while(True):
+            key = getChar()
+            
+            if(key == b'\x03'): raise Exception() # Return ctrl+c functionality.
 
     def requestTrustedConnection(self):
         setTrustedConnection = self.config.tryGetValue("trustedConnection", False)

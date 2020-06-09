@@ -17,18 +17,38 @@ class SQuickLHandler:
             "-p": ParameterDefinition("Database Password. (requires -u)", ["-u"]),
             "-s": ParameterDefinition("Server address."),
             "-n": ParameterDefinition("Database name."),
+            "-t": ParameterDefinition("Enable Trusted Connection Flag.", [], False)
         })
 
     def run(self):
         try:
+            connectionString = ConnectionStringBuilder()
             self.paramReader.parse(sys.argv)
-            databaseServer = self.requestDatabaseServer()
-            credentials = self.requestLogin()
-            MSSQLHandler()
 
-        except Exception as e:
+            connectionString.setServer(self.requestDatabaseServer())
+
+            if(self.requestTrustedConnection()):
+                connectionString.enableTrustedConnection()
+            else:
+                connectionString.setCredentials(self.requestLogin())
+            
+            sqlHandler = MSSQLHandler(connectionString)
+            self.requestAction(sqlHandler)    
+
+        except ParameterException as e:
             print(e)
             self.paramReader.printUsage()
+
+    def requestAction(self, sqlHandler):
+        print(chr(27) + "[2J")
+        print(F"SQuickL [{sqlHandler.credentialInfo}@{sqlHandler.serverName}]")
+        input()
+
+    def requestTrustedConnection(self):
+        setTrustedConnection = self.config.tryGetValue("trustedConnection", False)
+        setTrustedConnection = self.paramReader.tryGetValue("-t", setTrustedConnection)
+
+        return setTrustedConnection
 
     def requestLogin(self):
 
@@ -46,10 +66,11 @@ class SQuickLHandler:
         return credentials
 
     def requestDatabaseServer(self):
-        databaseServer = self.paramReader.tryGetValue("-s", None)
+        databaseServer = self.config.tryGetValue("server", None)
+        databaseServer = self.paramReader.tryGetValue("-s", databaseServer)
 
         if(databaseServer): return databaseServer
-        return input("Database Server:")
+        return input("Db Server:")
 
 
     def requestInputIfNone(self, ref, displayText):

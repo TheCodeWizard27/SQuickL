@@ -3,9 +3,7 @@ import json
 
 class Config:
     
-    _configValues = {
-        "testValue": True
-    }
+    _configValues = {}
 
     def __init__(self, configPath):
         self.tryLoading(configPath)
@@ -16,7 +14,7 @@ class Config:
 
         with configFile.open() as file:
             configJson = json.loads(file.read())
-            for key, value in configJson.items(): 
+            for key, value in configJson.items():
                 self._configValues[key] = value
 
     def getValue(self, path):

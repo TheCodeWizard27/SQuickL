@@ -1,4 +1,6 @@
 
+class ParameterException(Exception): pass
+
 class ParameterDefinition:
     def __init__(
         self
@@ -22,7 +24,7 @@ class ParameterReader:
 
     def tryGetValue(self, key, default):
         # Return default if parameter doesn't exist or isn't set.
-        if(key not in self._definedParams or not self._definedParams[key]): return default
+        if(key not in self._definedParams or not self._definedParams[key].value): return default
         return self._definedParams[key].value
 
     def hasValue(self, key): return key in self._definedParams and self._definedParams[key]
@@ -40,8 +42,8 @@ class ParameterReader:
             for requirment in param.requires: self._checkRequirement(requirment)
                 
     def _checkRequirement(self, requirment):
-        if(requirment not in self._definedParams): raise Exception("Requirment [" + requirment + "] is not defined")
-        if(not self._definedParams[requirment].value): raise Exception("Parameter [" + requirment + "] needs to be defined.")
+        if(requirment not in self._definedParams): raise ParameterException("Requirment [" + requirment + "] is not defined")
+        if(not self._definedParams[requirment].value): raise ParameterException("Parameter [" + requirment + "] needs to be defined.")
     
     def _parseValues(self, argv):
         i = 1 # Skip the program name.
@@ -52,7 +54,7 @@ class ParameterReader:
                 self.printUsage() 
                 return
 
-            if(arg not in self._definedParams): raise Exception("Parameter [" + arg + "] is not defined")
+            if(arg not in self._definedParams): raise ParameterException("Parameter [" + arg + "] is not defined")
             
             argDefinition = self._definedParams[arg]
             
@@ -60,7 +62,7 @@ class ParameterReader:
                 i += 1 # Get next argument which is the value.
                 
                 # Check if arg is out of reach
-                if(i >= len(argv)): raise Exception("Parameter [" + arg + "] expects a value")
+                if(i >= len(argv)): raise ParameterException("Parameter [" + arg + "] expects a value")
                 argDefinition.value = argv[i]
             else:
                 argDefinition.value = True

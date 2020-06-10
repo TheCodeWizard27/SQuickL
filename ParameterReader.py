@@ -51,7 +51,7 @@ class ParameterReader:
             arg = argv[i]
 
             if(arg in ("-h", "/h", "--Help")): 
-                self.printUsage() 
+                raise ParameterException("Help")
                 return
 
             if(arg not in self._definedParams): raise ParameterException("Parameter [" + arg + "] is not defined")

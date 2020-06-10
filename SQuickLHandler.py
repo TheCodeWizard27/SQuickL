@@ -1,8 +1,9 @@
 from Config import Config
 from MSSQLHandler import *
 from ParameterReader import *
-import sys
 from Getch import getChar
+from SelectionHandler import *
+import sys
 
 class SQuickLHandler:
     _configPath = "config.json"
@@ -41,12 +42,22 @@ class SQuickLHandler:
             self.paramReader.printUsage()
 
     def requestAction(self, sqlHandler):
-        print(chr(27) + "[2J")
-        print(F"SQuickL [{sqlHandler.credentialInfo}@{sqlHandler.serverName}]")
-        
+        handler = SelectionHandler([
+            SelectableItem("Execute Query", "s"),
+            SelectableItem("Manual", "s"),
+            SelectableItem("Quit", "s")
+        ])
+
         while(True):
-            key = getChar()
+            self._clearScreen()
+            print(F"SQuickL [{sqlHandler.credentialInfo}@{sqlHandler.serverName}]")
             
+            handler.draw()
+            key = getChar()
+
+            if(key == b'\r'): return # Enter
+            if(key == b'P'): handler.selectNext() # Arrow Up
+            if(key == b'H'): handler.selectPrev() # Arrow Down
             if(key == b'\x03'): raise Exception() # Return ctrl+c functionality.
 
     def requestTrustedConnection(self):
@@ -77,6 +88,7 @@ class SQuickLHandler:
         if(databaseServer): return databaseServer
         return input("Db Server:")
 
-
     def requestInputIfNone(self, ref, displayText):
         return ref if ref else input(displayText) # Request input if not already defined.
+
+    def _clearScreen(self): print(chr(27) + "[2J")

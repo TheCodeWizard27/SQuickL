@@ -34,11 +34,9 @@ class MainController(UIController):
             SelectableItem("Quit", self._quit)
         ]), sQuickHandler)
 
-    def _execute_query(self):
-        return None
+    def _execute_query(self): return QueryListController(self._sQuickLHandler)
 
-    def _write_query(self):
-        return None
+    def _write_query(self): return ExecuteQueryController(self._sQuickLHandler)
 
     def _manual(self): return ManualController(self._sQuickLHandler)
 
@@ -57,3 +55,30 @@ class ManualController(UIController):
         self._sQuickLHandler.paramReader.print_usage()
 
     def on_selection(self, item): return MainController(self._sQuickLHandler)
+
+class QueryListController(UIController):
+    def __init__(self, sQuickHandler):
+        queries = [
+            SelectableItem(key, param) for key, param in sQuickHandler.config.try_get_value("queryList", {}).items()
+        ]
+        queries += [SelectableItem("Back")]
+        super().__init__(SelectionHandler(queries), sQuickHandler)
+
+    def on_selection(self, item):
+        if(not item.data): return MainController(self._sQuickLHandler)
+
+        clear_cl()
+        self._sQuickLHandler.run_query(item.data)
+        return self
+
+class ExecuteQueryController(UIController):
+    def __init__(self, sQuickHandler):
+        super().__init__(None, sQuickHandler) # Giving None works because the control_input function is overriden.
+
+    def control_input(self):
+        clear_cl()
+
+        query = input("Query:")
+        self._sQuickLHandler.run_query(query)
+
+        return MainController(self._sQuickLHandler)

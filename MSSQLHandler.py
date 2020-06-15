@@ -10,22 +10,27 @@ class ConnectionStringBuilder:
     _credentials = None
     _enableTrustedConnection = False
     _server = None
+    _base = ""
 
+    def set_base(self, base):
+        self._base = base
+        return self
     def set_credentials(self, credentials):
-        self.credentials = credentials
+        self._credentials = credentials
         return self
     def enable_trusted_connection(self):
-        self._enable_trusted_connection = True
+        self._enableTrustedConnection = True
         return self
     def set_server(self, serverName):
         self._server = serverName
         return self
 
     def build(self):
-        connectionString = "Driver={SQL Server}"
+        connectionString = self._base #"Driver={ODBC Driver 17 for SQL Server};"
         connectionString += self._write_if_true(self._server, f"Server={self._server};")
+        connectionString += self._write_if_true(True, "DATABASE=test;")
         connectionString += self._write_if_true(self._enableTrustedConnection, "Trusted_Connection=yes;")
-        connectionString += f"User Id={self._credentials.username};Password={self._credentials.password};" if self._credentials else ""
+        connectionString += f"UID={self._credentials.username};PWD={self._credentials.password};" if self._credentials else ""
         return connectionString
 
     def _write_if_true(self, condition, output): return output if condition else ""
@@ -37,11 +42,20 @@ class MSSQLHandler:
         self.serverName = connectionStringBuilder._server
         self.credentialInfoString = connectionStringBuilder._credentials.username if connectionStringBuilder._credentials else "No user"
 
-    def _execute_query(self, query):
+    def execute_query(self, query):
         connection = self._connect()
-        results = connection.execute(query)
-        connection.close()
+        results = None
+
+        try:
+            cursor = connection.execute(query)
+            results = cursor.fetchall() 
+        except pyodbc.Error as err:
+            results = err
+        finally:
+            connection.close()
 
         return results
+
+    def test_connection(self): self.execute_query("SELECT @@version;")
 
     def _connect(self): return pyodbc.connect(self._connectionString)

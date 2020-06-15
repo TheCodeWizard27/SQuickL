@@ -1,3 +1,8 @@
 {
-    "server":"localhost"
+    "server":"localhost",
+    "baseConnectionString":"Driver={ODBC Driver 17 for SQL Server};",
+    "queryList": {
+        "query1" : "select 1,2",
+        "query2" : "select 2,3"
+    }
 }

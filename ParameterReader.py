@@ -19,33 +19,37 @@ class ParameterReader:
         self._definedParams = definedParams
     
     def parse(self, argv):
-        self._parseValues(argv)
-        self._checkRequirements()
+        self._parse_values(argv)
+        self._check_requirements()
 
-    def tryGetValue(self, key, default):
+    def try_get_value(self, key, default):
         # Return default if parameter doesn't exist or isn't set.
         if(key not in self._definedParams or not self._definedParams[key].value): return default
         return self._definedParams[key].value
 
-    def hasValue(self, key): return key in self._definedParams and self._definedParams[key]
+    def has_value(self, *args):
+        for param in args:
+            if(self._definedParams[param].value): return True
 
-    def printUsage(self):
+        return False
+
+    def print_usage(self):
         print(self.usage + "\n")
 
         for key, param in self._definedParams.items():
             print(key + "\t" + param.description)
 
-    def _checkRequirements(self):
+    def _check_requirements(self):
         for key, param in self._definedParams.items():
             if(not param.value): continue # Check Requirment only if value is set.
 
-            for requirment in param.requires: self._checkRequirement(requirment)
+            for requirment in param.requires: self._check_requirement(requirment)
                 
-    def _checkRequirement(self, requirment):
+    def _check_requirement(self, requirment):
         if(requirment not in self._definedParams): raise ParameterException("Requirment [" + requirment + "] is not defined")
         if(not self._definedParams[requirment].value): raise ParameterException("Parameter [" + requirment + "] needs to be defined.")
     
-    def _parseValues(self, argv):
+    def _parse_values(self, argv):
         i = 1 # Skip the program name.
         while(i < len(argv)):
             arg = argv[i]

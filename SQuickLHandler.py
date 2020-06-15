@@ -1,8 +1,8 @@
 from Config import Config
 from MSSQLHandler import *
 from ParameterReader import *
-from Getch import getChar
-from SelectionHandler import *
+from Controllers import *
+from getpass import getpass
 import sys
 
 class SQuickLHandler:
@@ -15,6 +15,7 @@ class SQuickLHandler:
             {
             "-f": ParameterDefinition("File to be executed."),
             "-q": ParameterDefinition("Query to be executed."),
+            "-qs": ParameterDefinition("Query string to be executed."),
             "-u": ParameterDefinition("Database Username."),
             "-p": ParameterDefinition("Database Password. (requires -u)", ["-u"]),
             "-s": ParameterDefinition("Server address."),
@@ -27,68 +28,58 @@ class SQuickLHandler:
             connectionString = ConnectionStringBuilder()
             self.paramReader.parse(sys.argv)
 
-            connectionString.setServer(self.requestDatabaseServer())
+            connectionString.set_server(self.request_database_server())
 
-            if(self.requestTrustedConnection()):
-                connectionString.enableTrustedConnection()
+            if(self.request_trusted_connection()):
+                connectionString.enable_trusted_connection()
             else:
-                connectionString.setCredentials(self.requestLogin())
+                connectionString.set_credentials(self.request_login())
             
             sqlHandler = MSSQLHandler(connectionString)
-            self.requestAction(sqlHandler)    
+
+            if(self.paramReader.has_value("-f", "-q", "-qs")):
+                return
+
+            self.run_ui_mode()
 
         except ParameterException as e:
             print(e)
-            self.paramReader.printUsage()
+            self.paramReader.print_usage()
 
-    def requestAction(self, sqlHandler):
-        handler = SelectionHandler([
-            SelectableItem("Execute Query", "s"),
-            SelectableItem("Manual", "s"),
-            SelectableItem("Quit", "s")
-        ])
+    def run_ui_mode(self):
+        controller = MainController(self)
 
         while(True):
-            self._clearScreen()
-            print(F"SQuickL [{sqlHandler.credentialInfo}@{sqlHandler.serverName}]")
-            
-            handler.draw()
-            key = getChar()
+            if(not controller): return # Quit program if no controller available.
+            controller = controller.control_input()
 
-            if(key == b'\r'): return # Enter
-            if(key == b'P'): handler.selectNext() # Arrow Up
-            if(key == b'H'): handler.selectPrev() # Arrow Down
-            if(key == b'\x03'): raise Exception() # Return ctrl+c functionality.
-
-    def requestTrustedConnection(self):
-        setTrustedConnection = self.config.tryGetValue("trustedConnection", False)
-        setTrustedConnection = self.paramReader.tryGetValue("-t", setTrustedConnection)
+    def request_trusted_connection(self):
+        setTrustedConnection = self.config.try_get_value("trustedConnection", False)
+        setTrustedConnection = self.paramReader.try_get_value("-t", setTrustedConnection)
 
         return setTrustedConnection
 
-    def requestLogin(self):
+    def request_login(self):
 
         credentials = Credentials()
         inputFunctions = []
 
-        credentials.username = self.paramReader.tryGetValue("-u", None)
-        credentials.password = self.paramReader.tryGetValue("-p", None)
+        credentials.username = self.paramReader.try_get_value("-u", None)
+        credentials.password = self.paramReader.try_get_value("-p", None)
         
         if(not credentials.unfinished()): return credentials # If Credentials are already set by other methods just return them.
 
         print("[ Please Login ]")
-        credentials.username = self.requestInputIfNone(credentials.username, "Username: ")
-        credentials.password = self.requestInputIfNone(credentials.password, "Password: ")
+        credentials.username = self.request_input_if_none(credentials.username, "Username: ")
+        credentials.password = self.request_input_if_none(credentials.password, "Password: ", getpass)
         return credentials
 
-    def requestDatabaseServer(self):
-        databaseServer = self.config.tryGetValue("server", None)
-        databaseServer = self.paramReader.tryGetValue("-s", databaseServer)
+    def request_database_server(self):
+        databaseServer = self.config.try_get_value("server", None)
+        databaseServer = self.paramReader.try_get_value("-s", databaseServer)
 
         if(databaseServer): return databaseServer
         return input("Db Server:")
 
-    def requestInputIfNone(self, ref, displayText):
-        return ref if ref else input(displayText) # Request input if not already defined.
-
-    def _clearScreen(self): print(chr(27) + "[2J")
+    def request_input_if_none(self, ref, displayText, inputFunc = input):
+        return ref if ref else inputFunc(displayText) # Request input if not already defined.

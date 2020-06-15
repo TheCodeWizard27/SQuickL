@@ -1,6 +1,6 @@
 
 class SelectableItem:
-    def __init__(self, label, data):
+    def __init__(self, label, data = None):
         self.label = label
         self.data = data
         self.selected = False
@@ -23,33 +23,33 @@ class SelectionHandler:
         for item in self._items:
             #print(blankLine) 
 
-            tmpLabel = self.limitName("> " + item.label if item.selected else "" + item.label)
+            tmpLabel = self.limit_name("> " + item.label if item.selected else "" + item.label)
             marginString = " " * self._margin
-            print("|" + marginString + tmpLabel + " " * self.getRemainingWidth(tmpLabel) + marginString + "|")
+            print("|" + marginString + tmpLabel + " " * self.get_remaining_width(tmpLabel) + marginString + "|")
 
             #print(blankLine)
 
         print(seperator)
 
-    def limitName(self, label): 
-        if(len(label) <= self.getRealWidth()):
+    def limit_name(self, label): 
+        if(len(label) <= self.get_real_width()):
             return label
         else:
             # Remove everything after the max length and 3 more to make space for the ...
-            return label[:self.getRealWidth()-3] + "..."
+            return label[:self.get_real_width()-3] + "..."
 
-    def getRemainingWidth(self, label): return self.getRealWidth() - len(label)
+    def get_remaining_width(self, label): return self.get_real_width() - len(label)
 
-    def getRealWidth(self): return self._width - self._margin*2
+    def get_real_width(self): return self._width - self._margin*2
 
-    def getSelectedItem(self): return self._items[self._selectedIndex]
+    def get_selected_item(self): return self._items[self._selectedIndex]
 
-    def selectNext(self): 
-        self._selectNew(self._selectedIndex+1 if self._selectedIndex < len(self._items)-1 else 0)
-    def selectPrev(self): 
-        self._selectNew(self._selectedIndex-1 if self._selectedIndex > 0 else len(self._items)-1)
+    def select_next(self): 
+        self._select_new(self._selectedIndex+1 if self._selectedIndex < len(self._items)-1 else 0)
+    def select_prev(self): 
+        self._select_new(self._selectedIndex-1 if self._selectedIndex > 0 else len(self._items)-1)
 
-    def _selectNew(self, newValue):
+    def _select_new(self, newValue):
         self._items[self._selectedIndex].selected = False # Deselect current.
         self._selectedIndex = newValue
         self._items[self._selectedIndex].selected = True # Select next.

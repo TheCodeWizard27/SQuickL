@@ -6,9 +6,9 @@ class Config:
     _configValues = {}
 
     def __init__(self, configPath):
-        self.tryLoading(configPath)
+        self.try_loading(configPath)
 
-    def tryLoading(self, configPath):
+    def try_loading(self, configPath):
         configFile = Path(configPath)
         if(not configFile.exists()): return
 
@@ -17,9 +17,9 @@ class Config:
             for key, value in configJson.items():
                 self._configValues[key] = value
 
-    def getValue(self, path):
+    def get_value(self, path):
         return self._configValues[path]
 
-    def tryGetValue(self, path, default):
+    def try_get_value(self, path, default):
         if(path not in self._configValues): return default
         return self._configValues[path]

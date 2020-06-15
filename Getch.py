@@ -35,4 +35,4 @@ class _GetchWindows:
         import msvcrt
         return msvcrt.getch()
 
-getChar = _Getch()
+get_char = _Getch()

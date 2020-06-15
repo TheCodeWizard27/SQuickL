@@ -11,38 +11,37 @@ class ConnectionStringBuilder:
     _enableTrustedConnection = False
     _server = None
 
-    def setCredentials(self, credentials):
+    def set_credentials(self, credentials):
         self.credentials = credentials
         return self
-    def enableTrustedConnection(self):
-        self._enableTrustedConnection = True
+    def enable_trusted_connection(self):
+        self._enable_trusted_connection = True
         return self
-    def setServer(self, serverName):
+    def set_server(self, serverName):
         self._server = serverName
         return self
 
     def build(self):
         connectionString = "Driver={SQL Server}"
-        connectionString += self._writeIfTrue(self._server, f"Server={self._server};")
-        connectionString += self._writeIfTrue(self.enableTrustedConnection, "Trusted_Connection=yes;")
+        connectionString += self._write_if_true(self._server, f"Server={self._server};")
+        connectionString += self._write_if_true(self._enableTrustedConnection, "Trusted_Connection=yes;")
         connectionString += f"User Id={self._credentials.username};Password={self._credentials.password};" if self._credentials else ""
         return connectionString
 
-    def _writeIfTrue(self, condition, output): return output if condition else ""
+    def _write_if_true(self, condition, output): return output if condition else ""
 
 class MSSQLHandler:
 
     def __init__(self, connectionStringBuilder):
         self._connectionString = connectionStringBuilder.build()
         self.serverName = connectionStringBuilder._server
-        self.credentialInfo = connectionStringBuilder._credentials.username if connectionStringBuilder._credentials else "No user"
+        self.credentialInfoString = connectionStringBuilder._credentials.username if connectionStringBuilder._credentials else "No user"
 
-    def executeQuery(self, query):
+    def _execute_query(self, query):
         connection = self._connect()
         results = connection.execute(query)
         connection.close()
 
         return results
 
-    def _connect(self):
-        return pyodbc.connect(self._connectionString)
+    def _connect(self): return pyodbc.connect(self._connectionString)

@@ -31,6 +31,7 @@ class SelectionHandler:
 
         print(seperator)
 
+    # Will return an edited string that is shorter if the string is longer than the space it has.
     def limit_name(self, label): 
         if(len(label) <= self.get_real_width()):
             return label
@@ -40,6 +41,7 @@ class SelectionHandler:
 
     def get_remaining_width(self, label): return self.get_real_width() - len(label)
 
+    # Get Width with margin for both sides.
     def get_real_width(self): return self._width - self._margin*2
 
     def get_selected_item(self): return self._items[self._selectedIndex]

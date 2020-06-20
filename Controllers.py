@@ -7,6 +7,8 @@ class UIController:
         self._selectionHandler = selectionHandler
         self._sQuickLHandler = sQuickLHandler
 
+    # Input function that controlls input and output.
+    # Return value will be used for next Controller.
     def control_input(self):
         while(True):
             clear_cl()

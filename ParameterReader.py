@@ -33,6 +33,7 @@ class ParameterReader:
 
         return False
 
+    # Print full usage and generates text for each defined parameter.
     def print_usage(self):
         print(self.usage + "\n")
 
@@ -54,6 +55,7 @@ class ParameterReader:
         while(i < len(argv)):
             arg = argv[i]
 
+            # End program right away to display help text.
             if(arg in ("-h", "/h", "--Help")): 
                 raise ParameterException("Help")
                 return

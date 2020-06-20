@@ -1,8 +1,8 @@
 from pathlib import Path
 import json
 
+# Enables loading through a config.json File.
 class Config:
-    
     _configValues = {}
 
     def __init__(self, configPath):

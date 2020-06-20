@@ -47,10 +47,12 @@ class SQuickLHandler:
         connectionString.set_base(self.config.try_get_value("baseConnectionString", "Driver={ODBC Driver 17 for SQL Server};"))
         connectionString.set_server(self.request_database_server())
         
+        # If trusted connection is active skip login and return mssqlhandler.
         if(self.request_trusted_connection()):
             connectionString.enable_trusted_connection()
             return MSSQLHandler(connectionString)
 
+        # Request credentials until connection test succeedes or the keyboardinterrupt exception is raised.
         while(True):
             connectionString.set_credentials(self.request_login())
             mssqlHandler = MSSQLHandler(connectionString)
@@ -111,6 +113,7 @@ class SQuickLHandler:
         with Path(file).open() as file:
             self.run_query(file.read())
     
+    # Executes a query that is defined in the set query list.
     def try_executing_listed_query(self):
         queryKey = self.paramReader.try_get_value("-lq", None)
         

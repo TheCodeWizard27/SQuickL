@@ -56,6 +56,7 @@ class MSSQLHandler:
 
         return results
 
+    # Will do a basic version query to check if the connection works.
     def test_connection(self): self.execute_query("SELECT @@version;")
 
     def _connect(self): return pyodbc.connect(self._connectionString)

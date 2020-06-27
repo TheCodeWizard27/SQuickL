@@ -7,7 +7,7 @@ and the odbc driver from Microsoft need to be installed.
 
 Installing pyodbc Windows
 ```
-    <pip path>/pip install 
+    <pip path>/pip install pyodbc
 ```
 Installing pyodbc Linux
 ```
